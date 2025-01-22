@@ -164,6 +164,10 @@ class StreamlitApp:
         with st.sidebar:
             st.title("AI Agent Dashboard")
             
+            # Initialize messages if not in session state
+            if 'messages' not in st.session_state:
+                st.session_state.messages = []
+            
             # User info section
             st.subheader("Session Info")
             total_messages = len(st.session_state.messages)
@@ -176,7 +180,6 @@ class StreamlitApp:
                 st.rerun()
                 
             if st.button("Export Conversation"):
-                # TODO: Implement export functionality
                 st.download_button(
                     "Download Chat",
                     data=str(st.session_state.messages),
