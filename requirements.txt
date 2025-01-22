@@ -1,0 +1,27 @@
+# Core dependencies
+torch
+transformers
+langgraph
+pydantic>=2.0.0
+streamlit
+
+# LLM and Search
+langchain
+langchain-nvidia-ai-endpoints
+tavily-python
+
+# Audio processing (optional)
+numpy
+soundfile
+
+# Utilities
+python-dotenv
+requests
+tqdm
+redis
+plotly
+
+# Development tools
+pytest
+black
+flake8 
