@@ -2,6 +2,7 @@ from typing import Dict, Any, List
 import numpy as np
 from sklearn.cluster import KMeans
 from datetime import datetime
+from collections import Counter
 
 class PersonalizationEngine:
     def __init__(self):

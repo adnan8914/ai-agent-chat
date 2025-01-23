@@ -4,49 +4,49 @@ from ..config.settings import MODEL_CONFIG, API_KEYS
 
 class LLMModel:
     def __init__(self):
-        self.config = MODEL_CONFIG["llm"]
-        self.client = ChatNVIDIA(
-            model=self.config["model_name"],
-            api_key=API_KEYS["nvidia"],
-            temperature=self.config["temperature"],
-            top_p=self.config["top_p"],
-            max_tokens=self.config["max_length"],
-        )
+        try:
+            self.config = MODEL_CONFIG["llm"]
+            self.client = ChatNVIDIA(
+                model=self.config["model_name"],
+                api_key=API_KEYS["nvidia"],
+                temperature=self.config["temperature"],
+                top_p=self.config["top_p"],
+                max_tokens=self.config["max_length"],
+            )
+        except Exception as e:
+            print(f"Error initializing LLM: {str(e)}")
+            # Fallback to a simpler configuration
+            self.use_fallback = True
         
     def generate(self, state: Dict[str, Any]) -> Dict[str, Any]:
         """Generate response based on input state"""
         try:
-            # Create a better prompt template
+            if hasattr(self, 'use_fallback'):
+                return {
+                    "response": "I'm currently experiencing technical difficulties. Please try again later."
+                }
+
             system_prompt = """You are a helpful and friendly AI assistant. Maintain a natural conversation flow.
-
-Core capabilities:
-- Answer questions and provide information
-- Help with analysis and problem-solving
-- Explain complex topics simply
-- Engage in casual conversation
-- Provide suggestions and recommendations
-
-Style guidelines:
-- Be friendly and conversational
-- Keep responses concise but informative
-- Show understanding and empathy
-- Ask follow-up questions when appropriate
-- Stay focused on the user's needs
-
-Remember previous context and maintain conversation continuity."""
+            
+            Core capabilities:
+            - Answer questions and provide information
+            - Help with analysis and problem-solving
+            - Explain complex topics simply
+            - Engage in casual conversation
+            - Provide suggestions and recommendations"""
             
             user_query = state.get('input', '')
-            context = state.get('memory', [])
+            if not user_query:
+                return {"response": "I didn't catch that. Could you please try again?"}
             
             # Format context for conversation flow
             context_str = ""
-            if context:
-                last_exchanges = context[-3:]  # Get last 3 exchanges for context
+            if state.get('memory'):
+                last_exchanges = state['memory'][-3:]
                 context_str = "\nPrevious conversation:\n" + "\n".join(
                     [f"User: {c['input']}\nAssistant: {c['response']}" for c in last_exchanges]
                 )
             
-            # Combine all parts into final prompt
             prompt = f"{system_prompt}\n\n{context_str}\nUser: {user_query}\nAssistant:"
             
             try:
@@ -54,18 +54,17 @@ Remember previous context and maintain conversation continuity."""
                 content = response.content if hasattr(response, 'content') else str(response)
                 
                 if not content:
-                    return {"response": "Could you please rephrase that? I want to make sure I understand correctly."}
+                    return {"response": "Could you please rephrase that?"}
                     
-                cleaned_response = self._clean_response(content)
-                return {"response": cleaned_response}
+                return {"response": self._clean_response(content)}
                 
             except Exception as e:
-                print(f"LLM Error: {str(e)}")
-                return {"response": "I'd like to help but having a small technical issue. Could you try asking that again?"}
+                print(f"Generation error: {str(e)}")
+                return {"response": "I'm having trouble processing that. Could you try again?"}
                 
         except Exception as e:
-            print(f"Generation Error: {str(e)}")
-            return {"response": "Let's start fresh - what would you like to know?"}
+            print(f"Unexpected error: {str(e)}")
+            return {"response": "I'm here to help but experiencing technical issues. Please try again."}
     
     def _format_context(self, context: list) -> str:
         """

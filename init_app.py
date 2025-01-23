@@ -24,26 +24,31 @@ import io
 
 def initialize_session_state():
     """Initialize Streamlit session state variables"""
-    if 'user' not in st.session_state:
-        st.session_state.user = None
-    if 'agent' not in st.session_state:
-        st.session_state.agent = AIAgent()
-    if 'user_manager' not in st.session_state:
-        st.session_state.user_manager = UserManager()
-    if 'personalization' not in st.session_state:
-        st.session_state.personalization = PersonalizationEngine()
-    if 'ab_testing' not in st.session_state:
-        st.session_state.ab_testing = ABTestingSystem()
-    if 'cache' not in st.session_state:
-        st.session_state.cache = CacheManager()
-    if 'analytics' not in st.session_state:
-        st.session_state.analytics = ConversationAnalytics()
-    if 'feedback' not in st.session_state:
-        st.session_state.feedback = FeedbackSystem()
-    if 'messages' not in st.session_state:
-        st.session_state.messages = []
-    if 'session_count' not in st.session_state:
-        st.session_state.session_count = 0
+    try:
+        if 'user' not in st.session_state:
+            st.session_state.user = None
+        if 'agent' not in st.session_state:
+            st.session_state.agent = AIAgent()
+        if 'user_manager' not in st.session_state:
+            st.session_state.user_manager = UserManager()
+        if 'personalization' not in st.session_state:
+            st.session_state.personalization = PersonalizationEngine()
+        if 'ab_testing' not in st.session_state:
+            st.session_state.ab_testing = ABTestingSystem()
+        if 'cache' not in st.session_state:
+            st.session_state.cache = CacheManager()
+        if 'analytics' not in st.session_state:
+            st.session_state.analytics = ConversationAnalytics()
+        if 'feedback' not in st.session_state:
+            st.session_state.feedback = FeedbackSystem()
+        if 'messages' not in st.session_state:
+            st.session_state.messages = []
+        if 'session_count' not in st.session_state:
+            st.session_state.session_count = 0
+        
+    except Exception as e:
+        print(f"Initialization error: {str(e)}")
+        st.error("Error initializing application. Please check your configuration.")
 
 def main():
     initialize_session_state()

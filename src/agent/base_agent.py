@@ -9,27 +9,31 @@ class AIAgent:
     def process(self, user_input: str, context: List[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Process user input and generate response"""
         try:
-            # Format the state with conversation history
+            # Format the state
             state = {
                 'input': user_input,
                 'memory': self._format_context(context) if context else [],
-                'sentiment': 'neutral'  # You can add sentiment analysis here
+                'sentiment': 'neutral'
             }
             
-            # Generate response
-            response = self.llm.generate(state)
-            
-            # Update conversation history
-            self.conversation_history.append({
-                'input': user_input,
-                'response': response['response']
-            })
-            
-            return response
-            
+            # Generate response with error handling
+            try:
+                response = self.llm.generate(state)
+                if not response or 'response' not in response:
+                    raise ValueError("Invalid response format")
+                return response
+                
+            except Exception as e:
+                print(f"LLM error: {str(e)}")
+                return {
+                    "response": "I'm having trouble understanding. Could you rephrase your question?"
+                }
+                
         except Exception as e:
-            print(f"Agent processing error: {str(e)}")
-            return {"response": "I'm having trouble understanding. Could you try rephrasing that?"}
+            print(f"Processing error: {str(e)}")
+            return {
+                "response": "Something went wrong. Please try again."
+            }
             
     def _format_context(self, context: List[Dict[str, Any]]) -> List[Dict[str, str]]:
         """Format context for the LLM"""
