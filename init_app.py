@@ -344,55 +344,60 @@ def show_chat_interface():
         add_export_options()
 
 def add_voice_controls():
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("🎤 Voice Input"):
-            try:
-                # Show recording status
-                status_placeholder = st.empty()
-                status_placeholder.info("🎤 Recording will start in 3 seconds...")
-                time.sleep(1)
-                
-                # Record audio
-                duration = 5  # seconds
-                fs = 44100  # Sample rate
-                status_placeholder.info("🎤 Recording... Speak now!")
-                recording = sd.rec(int(duration * fs), samplerate=fs, channels=1, dtype='int16')
-                sd.wait()
-                
-                # Convert to wav format
-                status_placeholder.info("🎤 Processing speech...")
-                virtual_file = io.BytesIO()
-                recording = recording.flatten()
-                wav.write(virtual_file, fs, recording)
-                virtual_file.seek(0)
-                
-                # Convert to text
-                recognizer = sr.Recognizer()
-                with sr.AudioFile(virtual_file) as source:
-                    audio = recognizer.record(source)
-                    text = recognizer.recognize_google(audio)
+    try:
+        import sounddevice as sd
+        import numpy as np
+        import scipy.io.wavfile as wav
+        import speech_recognition as sr
+        import pyttsx3
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("🎤 Voice Input"):
+                try:
+                    # Voice input code...
+                    status_placeholder = st.empty()
+                    status_placeholder.info("🎤 Recording will start in 3 seconds...")
+                    time.sleep(1)
                     
-                if text:
-                    status_placeholder.success(f"Recognized: {text}")
-                    process_chat_input(text)
-                else:
-                    status_placeholder.error("No speech detected. Please try again.")
+                    duration = 5
+                    fs = 44100
+                    status_placeholder.info("🎤 Recording... Speak now!")
+                    recording = sd.rec(int(duration * fs), samplerate=fs, channels=1, dtype='int16')
+                    sd.wait()
                     
-            except Exception as e:
-                st.error(f"Voice input error: {str(e)}\nPlease check your microphone and try again.")
-                print(f"Voice input error details: {str(e)}")
-    
-    with col2:
-        if st.button("🔊 Read Response"):
-            try:
-                if st.session_state.messages:
-                    last_response = st.session_state.messages[-1]['content']
-                    engine = pyttsx3.init()
-                    engine.say(last_response)
-                    engine.runAndWait()
-            except Exception as e:
-                st.error("Could not process text-to-speech. Please try again.")
+                    virtual_file = io.BytesIO()
+                    recording = recording.flatten()
+                    wav.write(virtual_file, fs, recording)
+                    virtual_file.seek(0)
+                    
+                    recognizer = sr.Recognizer()
+                    with sr.AudioFile(virtual_file) as source:
+                        audio = recognizer.record(source)
+                        text = recognizer.recognize_google(audio)
+                        
+                    if text:
+                        status_placeholder.success(f"Recognized: {text}")
+                        process_chat_input(text)
+                    else:
+                        status_placeholder.error("No speech detected. Please try again.")
+                        
+                except Exception as e:
+                    st.error(f"Voice input error: {str(e)}")
+                    
+        with col2:
+            if st.button("🔊 Read Response"):
+                try:
+                    if st.session_state.messages:
+                        last_response = st.session_state.messages[-1]['content']
+                        engine = pyttsx3.init()
+                        engine.say(last_response)
+                        engine.runAndWait()
+                except Exception as e:
+                    st.error("Could not process text-to-speech.")
+                    
+    except ImportError:
+        st.warning("Voice features are not available. Please install required dependencies.")
 
 def show_analytics():
     """Enhanced analytics dashboard"""
