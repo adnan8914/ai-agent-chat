@@ -6,6 +6,9 @@ class LLMModel:
     def __init__(self):
         try:
             self.config = MODEL_CONFIG["llm"]
+            if not API_KEYS["nvidia"]:
+                raise ValueError("NVIDIA API key not found")
+            
             self.client = ChatNVIDIA(
                 model=self.config["model_name"],
                 api_key=API_KEYS["nvidia"],
@@ -15,57 +18,51 @@ class LLMModel:
             )
         except Exception as e:
             print(f"Error initializing LLM: {str(e)}")
-            # Fallback to a simpler configuration
             self.use_fallback = True
         
     def generate(self, state: Dict[str, Any]) -> Dict[str, Any]:
         """Generate response based on input state"""
-        try:
-            if hasattr(self, 'use_fallback'):
-                return {
-                    "response": "I'm currently experiencing technical difficulties. Please try again later."
-                }
+        if hasattr(self, 'use_fallback'):
+            return {
+                "response": "I'm a helpful AI assistant. I can help you with questions, coding, analysis, and more. What would you like to know?"
+            }
 
-            system_prompt = """You are a helpful and friendly AI assistant. Maintain a natural conversation flow.
+        system_prompt = """You are a helpful and friendly AI assistant. Maintain a natural conversation flow.
+        
+        Core capabilities:
+        - Answer questions and provide information
+        - Help with analysis and problem-solving
+        - Explain complex topics simply
+        - Engage in casual conversation
+        - Provide suggestions and recommendations"""
+        
+        user_query = state.get('input', '')
+        if not user_query:
+            return {"response": "I didn't catch that. Could you please try again?"}
+        
+        # Format context for conversation flow
+        context_str = ""
+        if state.get('memory'):
+            last_exchanges = state['memory'][-3:]
+            context_str = "\nPrevious conversation:\n" + "\n".join(
+                [f"User: {c['input']}\nAssistant: {c['response']}" for c in last_exchanges]
+            )
+        
+        prompt = f"{system_prompt}\n\n{context_str}\nUser: {user_query}\nAssistant:"
+        
+        try:
+            response = self.client.invoke(prompt)
+            content = response.content if hasattr(response, 'content') else str(response)
             
-            Core capabilities:
-            - Answer questions and provide information
-            - Help with analysis and problem-solving
-            - Explain complex topics simply
-            - Engage in casual conversation
-            - Provide suggestions and recommendations"""
-            
-            user_query = state.get('input', '')
-            if not user_query:
-                return {"response": "I didn't catch that. Could you please try again?"}
-            
-            # Format context for conversation flow
-            context_str = ""
-            if state.get('memory'):
-                last_exchanges = state['memory'][-3:]
-                context_str = "\nPrevious conversation:\n" + "\n".join(
-                    [f"User: {c['input']}\nAssistant: {c['response']}" for c in last_exchanges]
-                )
-            
-            prompt = f"{system_prompt}\n\n{context_str}\nUser: {user_query}\nAssistant:"
-            
-            try:
-                response = self.client.invoke(prompt)
-                content = response.content if hasattr(response, 'content') else str(response)
+            if not content:
+                return {"response": "Could you please rephrase that?"}
                 
-                if not content:
-                    return {"response": "Could you please rephrase that?"}
-                    
-                return {"response": self._clean_response(content)}
-                
-            except Exception as e:
-                print(f"Generation error: {str(e)}")
-                return {"response": "I'm having trouble processing that. Could you try again?"}
-                
+            return {"response": self._clean_response(content)}
+            
         except Exception as e:
-            print(f"Unexpected error: {str(e)}")
-            return {"response": "I'm here to help but experiencing technical issues. Please try again."}
-    
+            print(f"Generation error: {str(e)}")
+            return {"response": "I'm having trouble processing that. Could you try again?"}
+            
     def _format_context(self, context: list) -> str:
         """
         Format conversation context for the model

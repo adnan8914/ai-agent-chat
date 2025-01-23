@@ -17,10 +17,10 @@ MODEL_CONFIG = {
         "max_length": 512
     },
     "llm": {
-        "model_name": "meta/llama-3.1-405b-instruct",
-        "max_length": 1024,
-        "temperature": 0.2,
-        "top_p": 0.7
+        "model_name": os.getenv("MODEL_NAME", "mixtral-8x7b-instruct-v0.1"),
+        "temperature": float(os.getenv("TEMPERATURE", 0.7)),
+        "top_p": float(os.getenv("TOP_P", 0.9)),
+        "max_length": int(os.getenv("MAX_LENGTH", 200))
     },
     "speech_to_text": {
         "model_name": "facebook/wav2vec2-base-960h"
@@ -55,5 +55,6 @@ TOOL_CONFIG = {
 # API Keys
 API_KEYS = {
     "nvidia": os.getenv("NVIDIA_API_KEY"),
-    "tavily": os.getenv("TAVILY_API_KEY")
+    "tavily": os.getenv("TAVILY_API_KEY"),
+    "huggingface": os.getenv("HUGGINGFACE_TOKEN")
 } 
