@@ -18,10 +18,37 @@ soundfile
 python-dotenv
 requests
 tqdm
-redis
-plotly
+redis>=4.5.0
+plotly>=5.13.0
 
 # Development tools
 pytest
 black
-flake8 
+flake8
+
+# New dependencies
+jwt==2.7.0
+passlib==1.7.4
+scikit-learn>=1.0.2
+bcrypt>=4.0.1
+PyJWT>=2.7.0
+
+# Add under UI components
+streamlit-option-menu
+pillow
+
+# UI Enhancements
+streamlit-lottie
+
+# Voice and File Processing
+SpeechRecognition
+pyttsx3
+PyPDF2
+streamlit-ace
+
+# Additional UI
+streamlit-drawable-canvas
+
+# New dependencies
+sounddevice
+scipy 
