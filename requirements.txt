@@ -10,9 +10,11 @@ langchain
 langchain-nvidia-ai-endpoints
 tavily-python
 
-# Audio processing (optional)
+# Audio processing
 numpy
 soundfile
+sounddevice
+scipy
 
 # Utilities
 python-dotenv
@@ -26,29 +28,22 @@ pytest
 black
 flake8
 
-# New dependencies
-jwt==2.7.0
-passlib==1.7.4
-scikit-learn>=1.0.2
-bcrypt>=4.0.1
+# Authentication
 PyJWT>=2.7.0
+passlib>=1.7.4
+bcrypt>=4.0.1
 
-# Add under UI components
+# UI Components
 streamlit-option-menu
 pillow
-
-# UI Enhancements
 streamlit-lottie
+streamlit-ace
+streamlit-drawable-canvas
 
-# Voice and File Processing
+# Voice Processing
 SpeechRecognition
 pyttsx3
 PyPDF2
-streamlit-ace
-
-# Additional UI
-streamlit-drawable-canvas
 
 # New dependencies
-sounddevice
-scipy 
+scikit-learn>=1.0.2
